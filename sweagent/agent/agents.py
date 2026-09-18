@@ -822,8 +822,16 @@ class DefaultAgent(AbstractAgent):
 
         self.logger.warning(f"{error_template}")
 
+        assistant_message = {
+            "role": "assistant",
+            "content": output,
+            "agent": self.name,
+            "message_type": "assistant",
+        }
+        if (reasoning_content := kwargs.get("reasoning_content")) is not None:
+            assistant_message["reasoning_content"] = reasoning_content
         return self.messages + [
-            {"role": "assistant", "content": output, "agent": self.name, "message_type": "assistant"},
+            assistant_message,
             {"role": "user", "content": error_template, "agent": self.name, "message_type": "user"},
         ]
 
@@ -1048,10 +1056,10 @@ class DefaultAgent(AbstractAgent):
             else:
                 output = self.model.query(history)  # type: ignore
             step.output = output["message"]
-            # todo: Can't I override the parser in __init__?
-            step.thought, step.action = self.tools.parse_actions(output)
             step.thinking_blocks = output.get("thinking_blocks", [])
             step.reasoning_content = output.get("reasoning_content")
+            # Run parse_actions after getting reasoning_content so it is included in requery if parse_actions fails
+            step.thought, step.action = self.tools.parse_actions(output)
             if output.get("tool_calls") is not None:
                 step.tool_call_ids = [call["id"] for call in output["tool_calls"]]
                 step.tool_calls = output["tool_calls"]

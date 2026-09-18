@@ -861,6 +861,8 @@ class LiteLLMModel(AbstractModel):
                 message = {"role": role, "content": history_item["content"]}
             if "cache_control" in history_item:
                 message["cache_control"] = history_item["cache_control"]
+            if (reasoning_content := history_item.get("reasoning_content")) is not None:
+                message["reasoning_content"] = reasoning_content
             messages.append(message)
         n_cache_control = str(messages).count("cache_control")
         self.logger.debug(f"n_cache_control: {n_cache_control}")
