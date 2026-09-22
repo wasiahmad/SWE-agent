@@ -71,6 +71,7 @@ class HistoryItem(_HistoryItem, total=False):
     tags: list[str]
     cache_control: dict[str, Any] | None
     thinking_blocks: list[dict[str, Any]] | None
+    reasoning_content: str | None
 
     """HistoryProcessors can add these tags to enable special processing"""
 

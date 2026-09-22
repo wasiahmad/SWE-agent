@@ -863,6 +863,11 @@ class LiteLLMModel(AbstractModel):
                 message["cache_control"] = history_item["cache_control"]
             if (reasoning_content := history_item.get("reasoning_content")) is not None:
                 message["reasoning_content"] = reasoning_content
+                # LiteLLM preserves provider-specific message fields when forwarding
+                # requests, while some OpenAI-compatible providers drop the
+                # top-level reasoning_content field. Keep the alias so downstream
+                # adapters can restore the provider's expected reasoning field.
+                message["provider_specific_fields"] = {"reasoning": reasoning_content}
             messages.append(message)
         n_cache_control = str(messages).count("cache_control")
         self.logger.debug(f"n_cache_control: {n_cache_control}")
